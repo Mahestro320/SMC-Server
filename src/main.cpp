@@ -53,8 +53,8 @@ void runServer() {
 
 int main(int /* argc */, char** /* argv */) {
     init();
-    console::out::inf("starting server (" + network::getIpv4Address() + ":" + std::to_string(network::config::PORT) +
-                      ")");
+    console::out::inf("starting server v" + common::VERSION.toString() + " (" + network::getIpv4Address() + ":" +
+                      std::to_string(network::config::PORT) + ")");
     try {
         runServer();
     } catch (std::exception& e) {
