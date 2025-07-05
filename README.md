@@ -8,7 +8,7 @@ The server is programmed in **C++ (ISO C++20 Standard)**
 To compile it, you can use **Visual Studio** or the **basic C++ compiler**
 
 > [!IMPORTANT]
-> It needs **Boost 1.88.0+** to work. To do this, put the Boost include folder in **`external`**
+> It needs **Boost 1.88.0+** to work. To do this, **put the Boost include folder in `external`**
 
 ## How to use
 
