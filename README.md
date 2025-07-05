@@ -4,8 +4,8 @@ The SMC server (SMCS) is a server that receives TCP requests from an SMC client 
 
 ## How to compile
 
-The server is programmed in C++ (ISO C++20 Standard)
-To compile it, you can use Visual Studio or the basic C++ compiler
+The server is programmed in **C++ (ISO C++20 Standard)**
+To compile it, you can use **Visual Studio** or the **basic C++ compiler**
 
 > [!IMPORTANT]
 > It needs Boost 1.88.0+ to work. To do this, put the Boost include folder in "external"
