@@ -149,7 +149,9 @@
     <ClCompile Include="src\network\bfl\encoder.cpp" />
     <ClCompile Include="src\network\client.cpp" />
     <ClCompile Include="src\network\request\handlers\io_file_exists.cpp" />
-    <ClCompile Include="src\network\request\handlers\get_dir_content.cpp" />
+    <ClCompile Include="src\network\request\handlers\io_get_dir_content.cpp" />
+    <ClCompile Include="src\network\request\handlers\io_get_file_content.cpp" />
+    <ClCompile Include="src\network\request\handlers\io_get_file_size.cpp" />
     <ClCompile Include="src\network\request\handlers\io_get_file_type.cpp" />
     <ClCompile Include="src\network\request\handlers\io_get_real_path.cpp" />
     <ClCompile Include="src\network\request\handlers\logout.cpp" />
@@ -166,6 +168,7 @@
     <ClCompile Include="src\util\string.cpp" />
     <ClCompile Include="src\util\thread.cpp" />
     <ClCompile Include="src\util\time.cpp" />
+    <ClCompile Include="src\util\version.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\common.hpp" />
@@ -178,11 +181,12 @@
     <ClInclude Include="include\network\bfl\encoder.hpp" />
     <ClInclude Include="include\network\client.hpp" />
     <ClInclude Include="include\network\config.hpp" />
-    <ClInclude Include="include\network\request\every_handlers.hpp" />
     <ClInclude Include="include\network\request\handlers\io_file_exists.hpp" />
-    <ClInclude Include="include\network\request\handlers\get_dir_content.hpp" />
+    <ClInclude Include="include\network\request\handlers\io_get_dir_content.hpp" />
     <ClInclude Include="include\network\request\handlers\get_user_role.hpp" />
     <ClInclude Include="include\network\request\handler.hpp" />
+    <ClInclude Include="include\network\request\handlers\io_get_file_content.hpp" />
+    <ClInclude Include="include\network\request\handlers\io_get_file_size.hpp" />
     <ClInclude Include="include\network\request\handlers\io_get_file_type.hpp" />
     <ClInclude Include="include\network\request\handlers\io_get_real_path.hpp" />
     <ClInclude Include="include\network\request\handlers\logout.hpp" />
@@ -200,6 +204,12 @@
     <ClInclude Include="include\util\string.hpp" />
     <ClInclude Include="include\util\thread.hpp" />
     <ClInclude Include="include\util\time.hpp" />
+    <ClInclude Include="include\util\version.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include=".clang-format" />
+    <None Include="CHANGELOG.md" />
+    <None Include="README.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
