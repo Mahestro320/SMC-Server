@@ -30,7 +30,7 @@ bool IOGetFileContentRH::readBufferSize() {
 }
 
 bool IOGetFileContentRH::checkBufferSize() {
-    if (buffer_size > MAX_BUFFER_SIZE) {
+    if (buffer_size == 0 || buffer_size > MAX_BUFFER_SIZE) {
         network::sendResponse(*socket, ResponseId::InvalidBufferSize);
         return false;
     }
