@@ -8,6 +8,6 @@ namespace common {
 inline std::string main_thread_id{};
 inline bool is_running{true};
 
-inline constexpr Version VERSION{0, 2, 0};
+inline constexpr Version VERSION{0, 2, 1};
 
 } // namespace common
