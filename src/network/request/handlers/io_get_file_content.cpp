@@ -1,28 +1,53 @@
 #include "io/console.hpp"
 #include "network.hpp"
+#include "network/client.hpp"
 #include "network/request/handlers/io_get_file_content.hpp"
 
 namespace fs = std::filesystem;
 
 void IOGetFileContentRH::run() {
     socket = &client->getSocket();
-    if (!network::sendResponse(*socket, ResponseId::Ok) || !readBufferSize() || !checkBufferSize() || !readPath() ||
-        !checkPath()) {
+    if (!init()) {
         return;
     }
     getFileSize();
     calcBufferCount();
+    if (!tryToOpenFile()) {
+        return;
+    }
     try {
-        const bool success{openFile()};
-        network::sendResponse(*socket, response);
-        if (!success) {
-            return;
-        }
         startTransmition();
     } catch (const std::exception& e) {
         console::out::err(e);
     }
     closeFile();
+}
+
+bool IOGetFileContentRH::init() {
+    return network::sendResponse(*socket, ResponseId::Ok) && readBufferSize() && checkBufferSize() && readPath() &&
+           checkPath();
+}
+
+void IOGetFileContentRH::getFileSize() {
+    const SFS& sfs{client->getSFS()};
+    file_size = sfs.getFileSize(complete_path);
+}
+
+bool IOGetFileContentRH::tryToOpenFile() {
+    bool success{};
+    try {
+        success = openFile();
+        network::sendResponse(*socket, response);
+    } catch (const std::exception& e) {
+        console::out::err(e);
+        return false;
+    }
+    return success;
+}
+
+void IOGetFileContentRH::calcBufferCount() {
+    buffer_count = static_cast<uint64_t>(std::ceil(static_cast<double>(file_size) / buffer_size));
+    console::out::inf("buffer count: " + std::to_string(buffer_count));
 }
 
 bool IOGetFileContentRH::readBufferSize() {
@@ -65,16 +90,6 @@ bool IOGetFileContentRH::checkPath() {
     return true;
 }
 
-void IOGetFileContentRH::getFileSize() {
-    const SFS& sfs{client->getSFS()};
-    file_size = sfs.getFileSize(complete_path);
-}
-
-void IOGetFileContentRH::calcBufferCount() {
-    buffer_count = static_cast<uint64_t>(std::ceil(static_cast<double>(file_size) / buffer_size));
-    console::out::inf("buffer count: " + std::to_string(buffer_count));
-}
-
 bool IOGetFileContentRH::openFile() {
     input_file = new std::ifstream{complete_path, std::ios::binary | std::ios::beg};
     if (input_file && *input_file && input_file->is_open()) {
@@ -106,8 +121,23 @@ bool IOGetFileContentRH::sendNextBuffer() const {
         buffer.resize(bytes_read);
     }
     network::sendBuffer(*socket, buffer, true);
+    return checkFlag();
+}
+
+bool IOGetFileContentRH::checkFlag() const {
     uint8_t flag{};
-    return network::readInt<uint8_t>(*socket, flag) && flag == NEXT_BUFFER_FLAG;
+    if (!network::readInt<uint8_t>(*socket, flag)) {
+        console::out::err("error while reading flag");
+        return false;
+    }
+    if (flag == NEXT_BUFFER_FLAG) {
+        return true;
+    } else if (flag == STOP_FLAG) {
+        console::out::inf("client sent STOP_FLAG");
+        return false;
+    }
+    console::out::err("unknown flag: " + std::to_string(flag));
+    return false;
 }
 
 void IOGetFileContentRH::closeFile() {

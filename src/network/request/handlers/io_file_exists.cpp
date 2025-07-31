@@ -1,5 +1,6 @@
 #include "io/console.hpp"
 #include "network.hpp"
+#include "network/client.hpp"
 #include "network/request/handlers/io_file_exists.hpp"
 
 using boost::asio::ip::tcp;

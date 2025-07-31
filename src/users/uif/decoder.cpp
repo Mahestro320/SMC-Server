@@ -8,7 +8,7 @@ namespace fs = std::filesystem;
 
 bool UIFDecoder::loadDataFromPath(const fs::path& path) {
     std::ifstream file{path, std::ios::binary | std::ios::ate};
-    const fs::path relative_path{fs::relative(path, dirs::STRG)};
+    const fs::path relative_path{fs::relative(path, dirs::strg)};
     if (!file) {
         console::out::err("error while opening UIF file");
         return false;

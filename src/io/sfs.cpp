@@ -14,9 +14,9 @@ fs::path SFS::absoluteFromUserScope(const fs::path& path) const {
 #pragma warning(push)
 #pragma warning(disable : 26813)
     if (user.role == Role::User) {
-        return dirs::S_NETWORK / path;
+        return dirs::s_network / path;
     } else if (user.role == Role::Admin) {
-        return dirs::STRG / path;
+        return dirs::strg / path;
     }
 #pragma warning(pop)
     return path;
@@ -27,10 +27,10 @@ fs::path SFS::relativeToUserScope(const fs::path& path) const {
 #pragma warning(push)
 #pragma warning(disable : 26813)
     if (user.role == Role::User) {
-        return relative(path, dirs::S_NETWORK);
+        return relative(path, dirs::s_network);
     } else if (user.role == Role::Admin) {
 #pragma warning(pop)
-        return relative(path, dirs::STRG);
+        return relative(path, dirs::strg);
     }
     return path;
 }
@@ -115,10 +115,10 @@ bool SFS::canLexicallyAccess(const fs::path& path) const {
     if (user.role == Role::Developer) {
         return true;
     } else if (user.role == Role::Admin) {
-        return isInDirectory(path, dirs::STRG);
+        return isInDirectory(path, dirs::strg) && !isUIFFile(path);
     } else if (user.role == Role::User) {
 #pragma warning(pop)
-        return isInDirectory(path, dirs::S_NETWORK) && !isOtherUserDirectory(path);
+        return isInDirectory(path, dirs::s_network) && !isOtherUPCDirectory(path);
     }
     return true;
 }
@@ -150,8 +150,8 @@ bool SFS::isDirectory(const fs::path& path) const {
     return !ec && is_regular_file;
 }
 
-bool SFS::isOtherUserDirectory(const fs::path& path) const {
-    if (!isInDirectory(path, dirs::S_NETWORK)) {
+bool SFS::isOtherUPCDirectory(const fs::path& path) const {
+    if (!isInDirectory(path, dirs::s_network)) {
         return false;
     }
     const fs::path filename{path.filename()};
@@ -161,4 +161,12 @@ bool SFS::isOtherUserDirectory(const fs::path& path) const {
     }
     const User& user{client.getUser()};
     return !filename_str.ends_with(user.name);
+}
+
+bool SFS::isPUDDirectory(const fs::path& path) const {
+    return isInDirectory(path, dirs::s_users) && path != dirs::s_users && isDirectory(path);
+}
+
+bool SFS::isUIFFile(const fs::path& path) const {
+    return isPUDDirectory(path.parent_path()) && path.filename() == ".uif";
 }

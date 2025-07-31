@@ -14,9 +14,11 @@
 #include "io/logger.hpp"
 #include "network.hpp"
 #include "network/client.hpp"
-#include "network/config.hpp"
+#include "server/config.hpp"
 #include "users/manager.hpp"
 #include "util/thread.hpp"
+
+#include "io/directories.hpp" // DEBUG
 
 using boost::asio::ip::tcp;
 
@@ -24,6 +26,8 @@ namespace {
 
 void init() {
     common::main_thread_id = util::thread::getCurrentThreadIdAsString();
+    Config& config{Config::getInstance()};
+    config.load();
     Logger& logger{Logger::getInstance()};
     logger.init();
     UsersManager& users_manager{UsersManager::getInstance()};
@@ -42,36 +46,43 @@ void handleClient(tcp::socket socket) {
     console::out::inf("thread stopped");
 }
 
-void buildSocketOnConnection(boost::asio::io_context& io_context, tcp::acceptor& acceptor) {
-    tcp::socket socket{io_context};
-    acceptor.accept(socket);
-    std::thread t{handleClient, std::move(socket)};
-    t.detach();
+void acceptConnections(tcp::acceptor& acceptor, boost::asio::io_context& io_context) {
+    acceptor.async_accept([&](const boost::system::error_code& ec, tcp::socket socket) {
+        if (ec) {
+            console::out::err("error while accepting connection: " + ec.message());
+        } else {
+            std::thread t{handleClient, std::move(socket)};
+            t.detach();
+        }
+        acceptConnections(acceptor, io_context);
+    });
 }
 
-void runServer() {
+void runServer(uint16_t port) {
     boost::asio::io_context io_context{};
-    tcp::acceptor acceptor{io_context, tcp::endpoint(tcp::v4(), network::config::PORT)};
+    tcp::endpoint endpoint{tcp::v4(), port};
+    tcp::acceptor acceptor{io_context};
+
+    acceptor.open(endpoint.protocol());
+    acceptor.set_option(boost::asio::socket_base::reuse_address(true));
+    acceptor.bind(endpoint);
+    acceptor.listen();
+
     console::out::inf("server started, waiting for connections");
-    while (common::is_running) {
-        try {
-            buildSocketOnConnection(io_context, acceptor);
-        } catch (const std::bad_alloc& e) {
-            console::out::err("memory error: " + std::string{e.what()});
-        } catch (const std::exception& e) {
-            console::out::err("connect error: " + std::string{e.what()});
-        }
-    }
+    acceptConnections(acceptor, io_context);
+    io_context.run();
 }
 
 } // namespace
 
 int main(int /* argc */, char** /* argv */) {
-    init();
+    ::init();
+    Config& config{Config::getInstance()};
+    const ConfigValues& values{config.getValues()};
     console::out::inf("starting server v" + common::VERSION.toString() + " (" + network::getIpv4Address() + ":" +
-                      std::to_string(network::config::PORT) + ")");
+                      std::to_string(values.server_port) + ")");
     try {
-        runServer();
+        ::runServer(values.server_port);
     } catch (const std::bad_alloc& e) {
         console::out::err("UNHANDLED MEMORY ERROR: " + std::string{e.what()});
     } catch (const std::exception& e) {

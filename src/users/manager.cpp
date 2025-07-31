@@ -17,7 +17,7 @@ void UsersManager::load() {
     }
     uint32_t users_count{};
     uint32_t users_loaded_count{};
-    for (const fs::path& path : fs::directory_iterator{dirs::S_USERS}) {
+    for (const fs::path& path : fs::directory_iterator{dirs::s_users}) {
         ++users_count;
         UserLoader loader{path};
         if (!loader.load()) {
@@ -34,11 +34,11 @@ void UsersManager::load() {
 }
 
 bool UsersManager::checkUsersFolderExistence() const {
-    if (fs::exists(dirs::S_USERS)) {
+    if (fs::exists(dirs::s_users)) {
         return true;
     }
     console::out::err("the users directory does not exists");
-    fs::create_directories(dirs::S_USERS);
+    fs::create_directories(dirs::s_users);
     return false;
 }
 

@@ -4,10 +4,10 @@ The SMC server (SMCS) is a server that receives TCP requests from an SMC client 
 
 ## How to compile
 
-The server is programmed in C++ (ISO C++20 Standard)
-To compile it, you can use Visual Studio or the basic C++ compiler
+The client is programmed in **C++ (ISO C++20 Standard)**. To compile it, you can use **Visual Studio** or the **basic C++ compiler**
 
-> WARNING: It needs Boost 1.88.0+ to work. To do this, put the Boost include folder in "external"
+> [!WARNING]
+> It needs **Boost 1.88.0+ to work**. To do this, **put the Boost include folder in `external` directory at root**
 
 ## How to use
 
@@ -52,3 +52,32 @@ When a client connects, the server sends a welcome message: "SMC"
 
 Requests can be sent from the SMC client
 IDs are defined in the C++ header file "include/network/request/id.hpp"
+
+## Configuration file
+
+Its location is `data\config.ini` and it contains this values below
+
+> [!NOTE]
+> each value is for the example
+
+```ini
+[server]
+
+; The port on which the server accepts connections
+port=5000
+
+; If the paths given in this category do not have a drive
+; letter, then they will be relative to the root
+[dirs]
+
+; Server storage
+storage=srvdir
+
+; Server logs
+logs=logs
+```
+
+## Abbreviated names
+
+- PUD: Protected User Data
+- UPC: User Personnal Content

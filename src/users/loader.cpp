@@ -11,14 +11,14 @@ UserLoader::UserLoader(const fs::path& folder_path) : folder_path{folder_path} {
 }
 
 bool UserLoader::load() {
-    const fs::path rel_folder_path{fs::relative(folder_path, dirs::STRG)};
+    const fs::path rel_folder_path{fs::relative(folder_path, dirs::strg)};
     UIFDecoder uif_decoder{};
     if (!uif_decoder.loadDataFromPath(folder_path / UIF_FILE_NAME) || !uif_decoder.decode()) {
         console::out::err("error while loading user \"" + rel_folder_path.string() + "\"");
         return false;
     }
     loadUserFromUIFValues(uif_decoder.getValues());
-    user.perso_directory = dirs::S_NETWORK / (std::string{user_fs_config::PERSO_DIR_PREFIX} + "." + user.name);
+    user.perso_directory = dirs::s_network / (std::string{user_fs_config::PERSO_DIR_PREFIX} + "." + user.name);
     if (!createPersoDirectory()) {
         return false;
     }

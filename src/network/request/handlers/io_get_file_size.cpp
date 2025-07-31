@@ -1,5 +1,6 @@
 #include "io/console.hpp"
 #include "network.hpp"
+#include "network/client.hpp"
 #include "network/request/handlers/io_get_file_size.hpp"
 
 using boost::asio::ip::tcp;
@@ -7,10 +8,7 @@ namespace fs = std::filesystem;
 
 void IOGetFileSizeRH::run() {
     tcp::socket& socket{client->getSocket()};
-    if (!network::sendResponse(socket, ResponseId::Ok)) {
-        return;
-    }
-    if (!readTargetPath(socket)) {
+    if (!network::sendResponse(socket, ResponseId::Ok) || !readTargetPath(socket)) {
         return;
     }
     getFileSize();

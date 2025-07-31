@@ -1,5 +1,7 @@
 #pragma once
 
+#include <boost/asio.hpp>
+#include <filesystem>
 #include "../handler.hpp"
 
 class IOGetFileTypeRH final : public RH {

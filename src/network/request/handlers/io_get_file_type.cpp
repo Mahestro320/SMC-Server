@@ -1,6 +1,7 @@
 #include "io/console.hpp"
 #include "io/file_type.hpp"
 #include "network.hpp"
+#include "network/client.hpp"
 #include "network/request/handlers/io_get_file_type.hpp"
 
 using boost::asio::ip::tcp;

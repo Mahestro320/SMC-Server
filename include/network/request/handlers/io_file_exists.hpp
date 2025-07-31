@@ -1,5 +1,6 @@
 #pragma once
 
+#include <filesystem>
 #include "../handler.hpp"
 
 class IOFileExistsRH final : public RH {

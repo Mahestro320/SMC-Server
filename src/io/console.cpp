@@ -98,26 +98,6 @@ void printLineFormatted(const Message& msg) {
 
 } // namespace
 
-#ifdef DEBUG
-void console::out::ptr(const void* ptr, const std::source_location& location) {
-    printLineFormatted(Message{
-        .type = "POINTER",
-        .content = util::string::ptrToString(ptr),
-        .location = getMessageLocation(location),
-        .color = MessagePrefixColor::WHITE,
-    });
-}
-
-void console::out::debug(const std::string& inf, const std::source_location& location) {
-    printLineFormatted(Message{
-        .type = "DEBUG",
-        .content = inf,
-        .location = getMessageLocation(location),
-        .color = MessagePrefixColor::BLUE,
-    });
-}
-#endif
-
 void console::out::inf(const std::string& inf, const std::source_location& location) {
     printLineFormatted(Message{
         .type = "INFO",

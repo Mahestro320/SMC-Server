@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -142,6 +142,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\io\console.cpp" />
+    <ClCompile Include="src\io\directories.cpp" />
     <ClCompile Include="src\io\file_type.cpp" />
     <ClCompile Include="src\io\logger.cpp" />
     <ClCompile Include="src\io\sfs.cpp" />
@@ -160,10 +161,13 @@
     <ClCompile Include="src\network\request\handler.cpp" />
     <ClCompile Include="src\network\request\handlers\login.cpp" />
     <ClCompile Include="src\network\response\id.cpp" />
+    <ClCompile Include="src\server\config.cpp" />
     <ClCompile Include="src\users\loader.cpp" />
     <ClCompile Include="src\users\uif\decoder.cpp" />
     <ClCompile Include="src\users\manager.cpp" />
     <ClCompile Include="src\network.cpp" />
+    <ClCompile Include="src\util\env_var_str_resolver.cpp" />
+    <ClCompile Include="src\util\fs.cpp" />
     <ClCompile Include="src\util\role.cpp" />
     <ClCompile Include="src\util\string.cpp" />
     <ClCompile Include="src\util\thread.cpp" />
@@ -176,11 +180,11 @@
     <ClInclude Include="include\io\console.hpp" />
     <ClInclude Include="include\io\file_info.hpp" />
     <ClInclude Include="include\io\file_type.hpp" />
+    <ClInclude Include="include\util\fs.hpp" />
     <ClInclude Include="include\io\logger.hpp" />
     <ClInclude Include="include\io\sfs.hpp" />
     <ClInclude Include="include\network\bfl\encoder.hpp" />
     <ClInclude Include="include\network\client.hpp" />
-    <ClInclude Include="include\network\config.hpp" />
     <ClInclude Include="include\network\request\handlers\io_file_exists.hpp" />
     <ClInclude Include="include\network\request\handlers\io_get_dir_content.hpp" />
     <ClInclude Include="include\network\request\handlers\get_user_role.hpp" />
@@ -193,6 +197,7 @@
     <ClInclude Include="include\network\request\id.hpp" />
     <ClInclude Include="include\network\request\handlers\login.hpp" />
     <ClInclude Include="include\network\response\id.hpp" />
+    <ClInclude Include="include\server\config.hpp" />
     <ClInclude Include="include\users\fs_config.hpp" />
     <ClInclude Include="include\users\loader.hpp" />
     <ClInclude Include="include\users\uif\decoder.hpp" />
@@ -201,6 +206,7 @@
     <ClInclude Include="include\users\uif\values.hpp" />
     <ClInclude Include="include\users\user.hpp" />
     <ClInclude Include="include\network.hpp" />
+    <ClInclude Include="include\util\env_var_str_resolver.hpp" />
     <ClInclude Include="include\util\string.hpp" />
     <ClInclude Include="include\util\thread.hpp" />
     <ClInclude Include="include\util\time.hpp" />
@@ -209,6 +215,7 @@
   <ItemGroup>
     <None Include=".clang-format" />
     <None Include="CHANGELOG.md" />
+    <None Include="data\config.ini" />
     <None Include="README.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

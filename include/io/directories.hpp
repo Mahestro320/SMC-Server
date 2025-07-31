@@ -5,16 +5,21 @@
 namespace dirs {
 
 constexpr std::string_view COMPILATION_CURR_FILE_STR{__FILE__};
-const auto COMPILATION_CURR_FILE{std::filesystem::path(COMPILATION_CURR_FILE_STR)};
-const auto COMPILATION_ROOT{COMPILATION_CURR_FILE.parent_path().parent_path().parent_path()};
+inline const auto COMPILATION_CURR_FILE{std::filesystem::path(COMPILATION_CURR_FILE_STR)};
+inline const auto COMPILATION_ROOT{COMPILATION_CURR_FILE.parent_path().parent_path().parent_path()};
 
-const auto ROOT{std::filesystem::current_path()};
-const auto LOGS{ROOT / "logs"};
+inline const auto ROOT{std::filesystem::current_path()};
+inline const auto DATA{ROOT / "data"};
+inline const auto D_CONFIG{DATA / "config.ini"};
 
-// storage directory
-const auto STRG{ROOT / "srvdir"};
-const auto S_USERS{STRG / "users"};
-const auto S_NETWORK{STRG / "network"};
-const auto S_NETWORK_SHARED{S_NETWORK / "shared"};
+inline std::filesystem::path logs{};
+inline std::filesystem::path strg{}; // storage
+
+inline std::filesystem::path s_users{};
+inline std::filesystem::path s_network{};
+inline std::filesystem::path s_network_shared{};
+
+extern void setLogs(const std::filesystem::path& path);
+extern void setStorage(const std::filesystem::path& path);
 
 }; // namespace dirs

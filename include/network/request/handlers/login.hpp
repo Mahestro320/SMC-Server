@@ -1,5 +1,6 @@
 #pragma once
 
+#include <boost/asio.hpp>
 #include <string>
 #include "../handler.hpp"
 #include "network/response/id.hpp"

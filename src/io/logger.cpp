@@ -14,14 +14,14 @@ Logger& Logger::getInstance() {
 }
 
 void Logger::init() {
-    if (!fs::exists(dirs::LOGS)) {
-        fs::create_directories(dirs::LOGS);
+    if (!fs::exists(dirs::logs)) {
+        fs::create_directories(dirs::logs);
     }
     setLogPath();
 }
 
 void Logger::setLogPath() {
-    log_path = dirs::LOGS / (std::to_string(util::time::getMillis()) + "." + std::string(LOG_EXT.data()));
+    log_path = dirs::logs / (std::to_string(util::time::getMillis()) + "." + std::string(LOG_EXT.data()));
 }
 
 void Logger::log(const std::string& data) const {

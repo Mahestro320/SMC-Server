@@ -5,7 +5,15 @@
 
 class Client;
 
-// Secured Filesystem
+/*
+ * Here is what the abbreviated names in this code mean:
+ *
+ * SFS: Secured Filesystem
+ * PUD: Protected User Data
+ * UPC: User Personnal Content
+ *
+ */
+
 class SFS final {
   private:
     Client& client;
@@ -26,5 +34,7 @@ class SFS final {
     bool exists(const std::filesystem::path& path) const;
     bool isRegularFile(const std::filesystem::path& path) const;
     bool isDirectory(const std::filesystem::path& path) const;
-    bool isOtherUserDirectory(const std::filesystem::path& path) const;
+    bool isOtherUPCDirectory(const std::filesystem::path& path) const;
+    bool isPUDDirectory(const std::filesystem::path& path) const;
+    bool isUIFFile(const std::filesystem::path& path) const;
 };
