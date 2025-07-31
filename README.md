@@ -1,4 +1,4 @@
-# SMC (Super Mega Cool) Server v0.2.1 by Mahestro_320
+# SMC (Super Mega Cool) Server v0.2.2 by Mahestro_320
 
 The SMC server (SMCS) is a server that receives TCP requests from an SMC client to access files, display directory contents, etc.
 

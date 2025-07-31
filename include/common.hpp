@@ -7,6 +7,6 @@ namespace common {
 
 inline std::string main_thread_id{};
 
-inline constexpr Version VERSION{0, 2, 1};
+inline constexpr Version VERSION{0, 2, 2};
 
 } // namespace common

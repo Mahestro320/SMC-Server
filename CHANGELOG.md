@@ -30,3 +30,8 @@
 - refactoring `logout` request handler
 - refactoring `network/request/handler`
 - adding security check for `io/sfs`
+
+## Version 0.2.2
+
+- adding architecture check
+- x86-64 compatibility

@@ -3,9 +3,11 @@
  * created the 18/06/25
  *
  * by Mahestro_320
- *
- * boost version: 1.88.0
  */
+
+#include "compilation/arch_check.hpp"
+
+#define _WIN32_WINNT 0x0601
 
 #include <array>
 #include <boost/asio.hpp>
@@ -17,8 +19,6 @@
 #include "server/config.hpp"
 #include "users/manager.hpp"
 #include "util/thread.hpp"
-
-#include "io/directories.hpp" // DEBUG
 
 using boost::asio::ip::tcp;
 

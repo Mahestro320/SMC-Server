@@ -6,5 +6,5 @@
 struct FileInfo {
     std::string name{};
     FileType type{};
-    uint64_t size{};
+    size_t size{};
 };

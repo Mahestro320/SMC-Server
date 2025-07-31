@@ -30,7 +30,7 @@ bool IOGetFileContentRH::init() {
 
 void IOGetFileContentRH::getFileSize() {
     const SFS& sfs{client->getSFS()};
-    file_size = sfs.getFileSize(complete_path);
+    file_size = static_cast<size_t>(sfs.getFileSize(complete_path));
 }
 
 bool IOGetFileContentRH::tryToOpenFile() {
@@ -46,12 +46,21 @@ bool IOGetFileContentRH::tryToOpenFile() {
 }
 
 void IOGetFileContentRH::calcBufferCount() {
-    buffer_count = static_cast<uint64_t>(std::ceil(static_cast<double>(file_size) / buffer_size));
+    buffer_count = static_cast<size_t>(std::ceil(static_cast<double>(file_size) / buffer_size));
     console::out::inf("buffer count: " + std::to_string(buffer_count));
 }
 
 bool IOGetFileContentRH::readBufferSize() {
+#if SIZE_MAX == UINT64_MAX
     return network::readInt<uint64_t>(*socket, buffer_size);
+#else
+    uint64_t buffer_size_64{};
+    if (!network::readInt<uint64_t>(*socket, buffer_size_64)) {
+        return false;
+    }
+    buffer_size = static_cast<size_t>(buffer_size_64);
+    return true;
+#endif
 }
 
 bool IOGetFileContentRH::checkBufferSize() {

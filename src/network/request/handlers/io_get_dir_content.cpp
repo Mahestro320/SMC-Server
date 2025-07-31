@@ -82,7 +82,7 @@ void IOGetDirContentRH::pushFileInList(const fs::path& file) {
     };
     if (fs::is_regular_file(file)) {
         file_info.type = FileType::File;
-        file_info.size = fs::file_size(file);
+        file_info.size = static_cast<size_t>(fs::file_size(file));
     } else if (fs::is_directory(file)) {
         file_info.type = FileType::Directory;
     }

@@ -15,7 +15,7 @@ bool UIFDecoder::loadDataFromPath(const fs::path& path) {
     }
     const std::streampos file_size{file.tellg()};
     file.seekg(std::ios::beg);
-    data.resize(file_size);
+    data.resize(static_cast<size_t>(file_size));
     if (!file.read(data.data(), file_size)) {
         console::out::err("error while reading UIF file");
         return false;

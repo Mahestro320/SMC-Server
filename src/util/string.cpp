@@ -14,9 +14,9 @@ std::string util::string::ptrToString(const void* ptr) {
     return "0x" + oss.str();
 }
 
-std::string util::string::getStringFromArray(const char* array, uint64_t size) {
-    uint64_t end_offset{size};
-    for (uint64_t i{0}; i < size; ++i) {
+std::string util::string::getStringFromArray(const char* array, size_t size) {
+    size_t end_offset{size};
+    for (size_t i{0}; i < size; ++i) {
         if (array[i] == 0x00) {
             end_offset = i;
             break;

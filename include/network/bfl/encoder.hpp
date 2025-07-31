@@ -8,7 +8,7 @@ class BFLEncoder final {
     std::vector<FileInfo> data{};
     std::vector<char> bfl{};
 
-    uint64_t current_offset{};
+    size_t current_offset{};
 
     void pushFileCount();
     void allocMemoryForFiles();
@@ -17,7 +17,7 @@ class BFLEncoder final {
     void pushFileSizeOf(const FileInfo& file);
     void pushFileNameSizeOf(const FileInfo& file);
     void pushFileNameOf(const FileInfo& file);
-    uint64_t getFileSizeInBuffer(const FileInfo& file);
+    size_t getFileSizeInBuffer(const FileInfo& file);
 
   public:
     BFLEncoder() = default;

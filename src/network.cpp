@@ -47,10 +47,18 @@ bool network::sendString(tcp::socket& socket, const std::string& str, bool silen
 bool network::readBuffer(tcp::socket& socket, std::vector<char>& buffer, bool silent) {
     pinf("reading buffer size", silent);
     boost::system::error_code error_code{};
-    uint64_t buffer_size{};
+    size_t buffer_size{};
+#if SIZE_MAX == UINT64_MAX
     if (!readInt<uint64_t>(socket, buffer_size)) {
         return false;
     }
+#else
+    uint64_t buffer_size_64{};
+    if (!readInt<uint64_t>(socket, buffer_size_64)) {
+        return false;
+    }
+    buffer_size = static_cast<size_t>(buffer_size_64);
+#endif
     buffer.resize(buffer_size);
     pinf("reading buffer content", silent);
     const size_t bytes_read{boost::asio::read(socket, boost::asio::buffer(buffer, buffer_size), error_code)};
