@@ -105,10 +105,28 @@
     <ClCompile Include="src\server\config.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="src\util\env_var_str_resolver.cpp">
+    <ClCompile Include="src\util\fs.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="src\util\fs.cpp">
+    <ClCompile Include="src\server\sysvar.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\network\request\handlers\run_syscmd.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util\resolver\con_str_prop.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\network\request\handlers\io_create_file.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util\error_message.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\network\request\handlers\io_create_directory.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\network\request\handlers\io_set_file_content.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>
@@ -212,16 +230,52 @@
     <ClInclude Include="include\network\request\handlers\io_get_file_content.hpp">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="include\util\env_var_str_resolver.hpp">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
     <ClInclude Include="include\server\config.hpp">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="include\util\fs.hpp">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="include\compilation\arch_check.hpp">
+    <ClInclude Include="include\system\beg.hpp">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="include\server\sysvar.hpp">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="include\util\resolver\evs_str.hpp">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="include\util\termcolor_map.hpp">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="include\server\config.ipp">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="include\util\resolver\evs_str.ipp">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="include\network.ipp">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="include\network\request\handlers\run_syscmd.hpp">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="include\util\resolver\con_str_prop.hpp">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="include\network\request\handlers\io_create_file.hpp">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="include\util\error_message.hpp">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="include\network\request\handlers\io_create_directory.hpp">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="include\network\request\handlers\io_set_file_content.hpp">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="include\network\request\handlers\util\dwl_upl.hpp">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
   </ItemGroup>

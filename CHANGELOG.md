@@ -35,3 +35,18 @@
 
 - adding architecture check
 - x86-64 compatibility
+- modified logger and console
+
+## Version 0.3.0
+
+- removing bug of architecture check by always importing `system/beg.hpp`
+- adding sysvars and properties
+- renaming class `EnvVarStrResolver` to `EVSStrResolver`
+- adding text colors
+- adding request handler `run_syscmd`
+- removing bug if client isn't logged for handlers
+- the logger opens now the file at initialization
+- removing SFS security bug
+- adding request handler `io_create_file`
+- adding request handler `io_create_directory`
+- adding request handler `io_set_file_content`
