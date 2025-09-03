@@ -1,5 +1,7 @@
 #pragma once
 
+#include "system/beg.hpp"
+
 #include <string>
 
 enum class Role : uint8_t {

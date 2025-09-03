@@ -1,14 +1,22 @@
 #pragma once
 
-#include <source_location>
+#include "system/beg.hpp"
+
 #include <string>
-#include "common.hpp"
 
-namespace console::out {
+namespace console {
 
-extern void inf(const std::string& inf = "", const std::source_location& location = std::source_location::current());
-extern void warn(const std::string& warn = "", const std::source_location& location = std::source_location::current());
-extern void err(const std::string& err = "", const std::source_location& location = std::source_location::current());
-extern void err(const std::exception& e, const std::source_location& location = std::source_location::current());
+inline constexpr size_t QUEUE_MAX_SIZE{0xFF};
 
-} // namespace console::out
+extern void init();
+
+namespace out {
+
+extern void inf(const std::string& message = "");
+extern void warn(const std::string& message = "");
+extern void err(const std::string& message = "");
+extern void err(const std::exception& e);
+
+} // namespace out
+
+} // namespace console

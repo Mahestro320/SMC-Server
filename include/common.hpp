@@ -1,12 +1,15 @@
 #pragma once
 
+#include "system/beg.hpp"
+
 #include <string>
 #include "util/version.hpp"
 
 namespace common {
 
-inline std::string main_thread_id{};
+inline constexpr char UNDEFINED_TEXT[]{"undefined"};
+inline constexpr Version VERSION{0, 3, 0};
 
-inline constexpr Version VERSION{0, 2, 2};
+inline std::string main_thread_id{};
 
 } // namespace common

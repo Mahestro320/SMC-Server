@@ -1,5 +1,7 @@
 #pragma once
 
+#include "system/beg.hpp"
+
 #include <string>
 
 enum class ResponseId : uint8_t {
@@ -9,6 +11,7 @@ enum class ResponseId : uint8_t {
     InvalidPassword = 0x40,
     InvalidData = 0x41,
     InvalidBufferSize = 0x42,
+    InvalidPermissions = 0x43,
     NotLogged = 0x80,
     IOFileNotExists = 0xC0,
     IOFileNotReadable = 0xC1,
@@ -16,6 +19,7 @@ enum class ResponseId : uint8_t {
     IONotFile = 0xC3,
     IOInvalidPath = 0xC4,
     IONonAbsolutePath = 0xC5,
+    IOAlreadyExists = 0xC6,
 };
 
 namespace network::response {

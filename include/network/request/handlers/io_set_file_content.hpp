@@ -8,37 +8,36 @@
 #include "../handler.hpp"
 #include "network/response/id.hpp"
 
-class IOGetFileContentRH final : public RH {
+class IOSetFileContentRH : public RH {
   private:
     boost::asio::ip::tcp::socket* socket{};
+    std::filesystem::path raw_path{}, complete_path{};
     uint64_t buffer_size{}, buffer_count{};
     uint64_t file_size{};
-    std::filesystem::path raw_path{}, complete_path{};
-    std::ifstream* input_file;
-
     std::vector<char> curr_buffer{};
     uint64_t curr_buffer_idx{};
-    ResponseId response{ResponseId::Ok};
+    std::ofstream* output_file{};
+    ResponseId response{};
 
     bool init();
-    void getFileSize();
+    bool readFileSize();
+    bool readBufferSize();
+    bool checkBufferSize() const;
+    bool readPath();
+    bool checkPath() const;
     void calcBufferCount();
     bool tryToOpenFile();
-    bool sendFileSize() const;
-    bool readBufferSize();
-    bool checkBufferSize();
-    bool readPath();
-    bool checkPath();
     bool openFile();
     void startTransmition();
-    bool readNextBufferFromFile();
-    bool sendCurrBuffer() const;
+    bool readNextBuffer();
+    bool writeCurrBufferIntoFile();
+    void resizeBufferIfNeeded();
     bool checkFlag() const;
     void closeFile();
 
   public:
-    IOGetFileContentRH() = default;
-    ~IOGetFileContentRH();
+    IOSetFileContentRH() = default;
+    ~IOSetFileContentRH();
 
     void run() override;
 };

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "system/beg.hpp"
+
 class Client;
 
 // Request handler

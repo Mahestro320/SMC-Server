@@ -1,5 +1,7 @@
 #pragma once
 
+#include "system/beg.hpp"
+
 #include <filesystem>
 #include <vector>
 #include "values.hpp"
