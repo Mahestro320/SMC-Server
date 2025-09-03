@@ -1,23 +1,48 @@
+#include "network/client.hpp"
+
 #include "io/console.hpp"
 #include "io/directories.hpp"
 #include "network.hpp"
-#include "network/client.hpp"
 #include "network/request/handlers/get_user_role.hpp"
+#include "network/request/handlers/io_create_directory.hpp"
+#include "network/request/handlers/io_create_file.hpp"
 #include "network/request/handlers/io_file_exists.hpp"
 #include "network/request/handlers/io_get_dir_content.hpp"
 #include "network/request/handlers/io_get_file_content.hpp"
 #include "network/request/handlers/io_get_file_size.hpp"
 #include "network/request/handlers/io_get_file_type.hpp"
 #include "network/request/handlers/io_get_real_path.hpp"
+#include "network/request/handlers/io_set_file_content.hpp"
 #include "network/request/handlers/login.hpp"
 #include "network/request/handlers/logout.hpp"
+#include "network/request/handlers/run_syscmd.hpp"
 #include "network/response/id.hpp"
 #include "util/string.hpp"
 
 using boost::asio::ip::tcp;
 namespace fs = std::filesystem;
 
-Client::Client(tcp::socket socket) : socket{std::move(socket)} {
+thread_local std::unique_ptr<Client> Client::thread_instance{nullptr};
+
+Client::Client(tcp::socket socket, uint32_t index) : socket{std::move(socket)}, index{index} {
+}
+
+void Client::setInstance(boost::asio::ip::tcp::socket socket, uint32_t index) {
+    if (thread_instance != nullptr) {
+        throw std::logic_error("Client instance already set for this thread");
+    }
+    thread_instance = std::make_unique<Client>(std::move(socket), index);
+}
+
+Client& Client::getInstance() {
+    if (thread_instance == nullptr) {
+        throw std::logic_error("Client instance not set for this thread");
+    }
+    return *thread_instance;
+}
+
+bool Client::isInstanceSet() {
+    return thread_instance != nullptr;
 }
 
 void Client::start() {
@@ -31,10 +56,8 @@ void Client::start() {
 }
 
 void Client::printLocation() const {
-    const tcp::endpoint remote_endpoint{socket.remote_endpoint()};
-    const boost::asio::ip::address client_address{remote_endpoint.address()};
-    console::out::inf("connected client at " + client_address.to_string() + ":" +
-                      std::to_string(remote_endpoint.port()));
+    console::out::inf("connected client at <:color=bright_blue>" + getAddress() + ':' + std::to_string(getPort()) +
+                      "<:color=reset>");
 }
 
 void Client::startCommunication() {
@@ -57,8 +80,8 @@ void Client::handleNewRequest() {
         return;
     }
     RequestId request_id{static_cast<RequestId>(request)};
-    console::out::inf("received request: " + std::to_string(request) + " (" + network::request::getName(request_id) +
-                      ")");
+    console::out::inf("received request: <:color=bright_blue>" + std::to_string(request) +
+                      "<:color=reset> (<:color=green>" + network::request::getName(request_id) + "<:color=reset>)");
     try {
         processReceivedRequest(request_id);
     } catch (const std::exception& e) {
@@ -105,6 +128,14 @@ RH* Client::getHandlerFromRequest(RequestId request) const {
         return new IOGetFileContentRH{};
     } else if (request == RequestId::IOGetRealPath) {
         return new IOGetRealPathRH{};
+    } else if (request == RequestId::IOSetFileContent) {
+        return new IOSetFileContentRH{};
+    } else if (request == RequestId::IOCreateFile) {
+        return new IOCreateFileRH{};
+    } else if (request == RequestId::IOCreateDirectory) {
+        return new IOCreateDirectoryRH{};
+    } else if (request == RequestId::RunSyscmd) {
+        return new RunSyscmdRH{};
     }
     return nullptr;
 }
@@ -123,6 +154,26 @@ const User& Client::getUser() const {
 
 SFS& Client::getSFS() {
     return sfs;
+}
+
+uint32_t Client::getIndex() const {
+    return index;
+}
+
+uint16_t Client::getPort() const {
+    const tcp::endpoint remote_endpoint{getRemoteEndpoint()};
+    const boost::asio::ip::port_type port{remote_endpoint.port()};
+    return port;
+}
+
+std::string Client::getAddress() const {
+    const tcp::endpoint remote_endpoint{getRemoteEndpoint()};
+    const boost::asio::ip::address address{remote_endpoint.address()};
+    return address.to_string();
+}
+
+tcp::endpoint Client::getRemoteEndpoint() const {
+    return socket.remote_endpoint();
 }
 
 void Client::setUser(const User& user) {

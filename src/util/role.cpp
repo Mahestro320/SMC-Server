@@ -1,5 +1,6 @@
-#include <unordered_map>
 #include "users/role.hpp"
+
+#include <unordered_map>
 
 namespace {
 

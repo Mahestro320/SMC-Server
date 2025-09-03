@@ -1,7 +1,8 @@
+#include "users/uif/decoder.hpp"
+
 #include <fstream>
 #include "io/console.hpp"
 #include "io/directories.hpp"
-#include "users/uif/decoder.hpp"
 #include "util/string.hpp"
 
 namespace fs = std::filesystem;

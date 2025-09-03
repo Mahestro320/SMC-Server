@@ -1,5 +1,6 @@
-#include <unordered_map>
 #include "io/file_type.hpp"
+
+#include <unordered_map>
 
 namespace {
 

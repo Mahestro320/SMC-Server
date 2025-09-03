@@ -1,6 +1,13 @@
+#include "util/string.hpp"
+
 #include <sstream>
 #include <vector>
-#include "util/string.hpp"
+
+void util::string::toLowercase(std::string& string) {
+    for (char& c : string) {
+        c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+    }
+}
 
 std::string util::string::formatDigits(int number, uint16_t digits) {
     std::vector<char> buffer(digits + 1);

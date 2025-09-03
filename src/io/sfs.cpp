@@ -1,6 +1,7 @@
+#include "io/sfs.hpp"
+
 #include "io/console.hpp"
 #include "io/directories.hpp"
-#include "io/sfs.hpp"
 #include "network/client.hpp"
 #include "users/fs_config.hpp"
 
@@ -53,6 +54,14 @@ fs::path SFS::real(const fs::path& path) const {
         return path;
     }
     return real_path;
+}
+
+fs::path SFS::removeEndBackslash(const fs::path& path) const {
+    std::string path_str{path.string()};
+    if (!path_str.empty() && (path_str.back() == '\\' || path_str.back() == '/')) {
+        path_str.pop_back();
+    }
+    return fs::path{path_str};
 }
 
 std::vector<fs::path> SFS::getDirectoryFileList(const fs::path& path) const {
@@ -118,7 +127,7 @@ bool SFS::canLexicallyAccess(const fs::path& path) const {
         return isInDirectory(path, dirs::strg) && !isUIFFile(path);
     } else if (user.role == Role::User) {
 #pragma warning(pop)
-        return isInDirectory(path, dirs::s_network) && !isOtherUPCDirectory(path);
+        return isSame(path, dirs::s_network) || (isInUPCDirectory(path) || isInDirectory(path, dirs::s_network_shared));
     }
     return true;
 }
@@ -130,6 +139,15 @@ bool SFS::exists(const fs::path& path) const {
         console::out::err(ec.message());
     }
     return !ec && does_exists;
+}
+
+bool SFS::isSame(const fs::path& first, const fs::path& second) const {
+    const fs::path first_normal{removeEndBackslash(first.lexically_normal())};
+    const fs::path second_normal{removeEndBackslash(second.lexically_normal())};
+    console::out::inf(
+        "first: " + first_normal.generic_string() + ", second: " + second_normal.generic_string() +
+        ", is same: " + ((first_normal.generic_string() == second_normal.generic_string()) ? "true" : "false"));
+    return first_normal.generic_string() == second_normal.generic_string();
 }
 
 bool SFS::isRegularFile(const fs::path& path) const {
@@ -150,17 +168,9 @@ bool SFS::isDirectory(const fs::path& path) const {
     return !ec && is_regular_file;
 }
 
-bool SFS::isOtherUPCDirectory(const fs::path& path) const {
-    if (!isInDirectory(path, dirs::s_network)) {
-        return false;
-    }
-    const fs::path filename{path.filename()};
-    const std::string filename_str{filename.string()};
-    if (!filename_str.starts_with(std::string{user_fs_config::PERSO_DIR_PREFIX} + ".")) {
-        return false;
-    }
+bool SFS::isInUPCDirectory(const fs::path& path) const {
     const User& user{client.getUser()};
-    return !filename_str.ends_with(user.name);
+    return isInDirectory(path, dirs::s_network / fs::path{"perso." + user.name});
 }
 
 bool SFS::isPUDDirectory(const fs::path& path) const {

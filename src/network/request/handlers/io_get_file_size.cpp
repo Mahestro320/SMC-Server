@@ -1,13 +1,19 @@
+#include "network/request/handlers/io_get_file_size.hpp"
+
 #include "io/console.hpp"
 #include "network.hpp"
 #include "network/client.hpp"
-#include "network/request/handlers/io_get_file_size.hpp"
 
 using boost::asio::ip::tcp;
 namespace fs = std::filesystem;
 
 void IOGetFileSizeRH::run() {
     tcp::socket& socket{client->getSocket()};
+    if (!client->isLogged()) {
+        console::out::err("the client isn't logged");
+        network::sendResponse(socket, ResponseId::NotLogged);
+        return;
+    }
     if (!network::sendResponse(socket, ResponseId::Ok) || !readTargetPath(socket)) {
         return;
     }

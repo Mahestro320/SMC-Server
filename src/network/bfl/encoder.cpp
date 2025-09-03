@@ -1,6 +1,7 @@
+#include "network/bfl/encoder.hpp"
+
 #include <type_traits>
 #include "io/console.hpp"
-#include "network/bfl/encoder.hpp"
 
 void BFLEncoder::setData(const std::vector<FileInfo>& data) {
     this->data = data;

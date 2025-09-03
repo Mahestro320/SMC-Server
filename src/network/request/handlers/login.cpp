@@ -1,7 +1,8 @@
+#include "network/request/handlers/login.hpp"
+
 #include "io/console.hpp"
 #include "network.hpp"
 #include "network/client.hpp"
-#include "network/request/handlers/login.hpp"
 #include "users/manager.hpp"
 
 using boost::asio::ip::tcp;

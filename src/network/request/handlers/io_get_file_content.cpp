@@ -1,9 +1,18 @@
+#include "network/request/handlers/io_get_file_content.hpp"
+
 #include "io/console.hpp"
 #include "network.hpp"
 #include "network/client.hpp"
-#include "network/request/handlers/io_get_file_content.hpp"
+#include "network/request/handlers/util/dwl_upl.hpp"
 
 namespace fs = std::filesystem;
+
+IOGetFileContentRH::~IOGetFileContentRH() {
+    if (input_file) {
+        input_file->close();
+    }
+    delete input_file;
+}
 
 void IOGetFileContentRH::run() {
     socket = &client->getSocket();
@@ -12,7 +21,7 @@ void IOGetFileContentRH::run() {
     }
     getFileSize();
     calcBufferCount();
-    if (!tryToOpenFile()) {
+    if (!tryToOpenFile() || !sendFileSize()) {
         return;
     }
     try {
@@ -24,6 +33,11 @@ void IOGetFileContentRH::run() {
 }
 
 bool IOGetFileContentRH::init() {
+    if (!client->isLogged()) {
+        console::out::err("the client isn't logged");
+        network::sendResponse(*socket, ResponseId::NotLogged);
+        return false;
+    }
     return network::sendResponse(*socket, ResponseId::Ok) && readBufferSize() && checkBufferSize() && readPath() &&
            checkPath();
 }
@@ -39,10 +53,15 @@ bool IOGetFileContentRH::tryToOpenFile() {
         success = openFile();
         network::sendResponse(*socket, response);
     } catch (const std::exception& e) {
+        network::sendResponse(*socket, ResponseId::IOFileNotReadable);
         console::out::err(e);
         return false;
     }
     return success;
+}
+
+bool IOGetFileContentRH::sendFileSize() const {
+    return network::sendInt<uint64_t>(*socket, file_size);
 }
 
 void IOGetFileContentRH::calcBufferCount() {
@@ -52,19 +71,22 @@ void IOGetFileContentRH::calcBufferCount() {
 
 bool IOGetFileContentRH::readBufferSize() {
 #if SIZE_MAX == UINT64_MAX
-    return network::readInt<uint64_t>(*socket, buffer_size);
+    if (!network::readInt<uint64_t>(*socket, buffer_size)) {
+        return false;
+    }
 #else
     uint64_t buffer_size_64{};
     if (!network::readInt<uint64_t>(*socket, buffer_size_64)) {
         return false;
     }
     buffer_size = static_cast<size_t>(buffer_size_64);
-    return true;
 #endif
+    console::out::inf("buffer size: " + std::to_string(buffer_size));
+    return true;
 }
 
 bool IOGetFileContentRH::checkBufferSize() {
-    if (buffer_size == 0 || buffer_size > MAX_BUFFER_SIZE) {
+    if (buffer_size == 0 || buffer_size > dwl_upl::constants::MAX_BUFFER_SIZE) {
         network::sendResponse(*socket, ResponseId::InvalidBufferSize);
         return false;
     }
@@ -77,9 +99,9 @@ bool IOGetFileContentRH::readPath() {
     if (!network::readString(*socket, path_str)) {
         return false;
     }
-    base_path = fs::path{path_str};
+    raw_path = fs::path{path_str};
     const SFS& sfs{client->getSFS()};
-    complete_path = sfs.absoluteFromUserScope(base_path);
+    complete_path = sfs.absoluteFromUserScope(raw_path);
     return true;
 }
 
@@ -111,25 +133,30 @@ bool IOGetFileContentRH::openFile() {
 void IOGetFileContentRH::startTransmition() {
     console::out::inf("sending buffers");
     for (; curr_buffer_idx < buffer_count; ++curr_buffer_idx) {
-        if (!sendNextBuffer()) {
+        if (!readNextBufferFromFile() || !sendCurrBuffer()) {
             return;
         }
     }
     console::out::inf("successfully sent buffers");
 }
 
-bool IOGetFileContentRH::sendNextBuffer() const {
-    std::vector<char> buffer(buffer_size);
-    input_file->read(buffer.data(), buffer_size);
-    const size_t bytes_read{static_cast<size_t>(input_file->gcount())};
-    if (bytes_read == 0) {
+bool IOGetFileContentRH::readNextBufferFromFile() {
+    curr_buffer = std::vector<char>(buffer_size);
+    input_file->read(curr_buffer.data(), buffer_size);
+    if (input_file->gcount() == 0) {
         console::out::err("error while reading file");
         return false;
     }
-    if (bytes_read != buffer_size) {
-        buffer.resize(bytes_read);
+    return true;
+}
+
+bool IOGetFileContentRH::sendCurrBuffer() const {
+    boost::system::error_code ec{};
+    const size_t bytes_send{boost::asio::write(*socket, boost::asio::buffer(curr_buffer, buffer_size), ec)};
+    if (ec) {
+        console::out::err("error while sending buffer: " + ec.message());
+        return false;
     }
-    network::sendBuffer(*socket, buffer, true);
     return checkFlag();
 }
 
@@ -139,13 +166,13 @@ bool IOGetFileContentRH::checkFlag() const {
         console::out::err("error while reading flag");
         return false;
     }
-    if (flag == NEXT_BUFFER_FLAG) {
+    if (flag == dwl_upl::constants::tr_flags::NEXT_BUFFER) {
         return true;
-    } else if (flag == STOP_FLAG) {
+    } else if (flag == dwl_upl::constants::tr_flags::STOP) {
         console::out::inf("client sent STOP_FLAG");
         return false;
     }
-    console::out::err("unknown flag: " + std::to_string(flag));
+    console::out::err("client sent an unknown flag: " + std::to_string(flag));
     return false;
 }
 

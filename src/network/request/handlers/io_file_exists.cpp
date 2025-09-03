@@ -1,7 +1,8 @@
+#include "network/request/handlers/io_file_exists.hpp"
+
 #include "io/console.hpp"
 #include "network.hpp"
 #include "network/client.hpp"
-#include "network/request/handlers/io_file_exists.hpp"
 
 using boost::asio::ip::tcp;
 namespace fs = std::filesystem;
@@ -9,7 +10,7 @@ namespace fs = std::filesystem;
 void IOFileExistsRH::run() {
     tcp::socket& socket{client->getSocket()};
     if (!client->isLogged()) {
-        console::out::err("the client must be logged to do this");
+        console::out::err("the client isn't logged");
         network::sendResponse(socket, ResponseId::NotLogged);
         return;
     }

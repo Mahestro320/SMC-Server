@@ -1,8 +1,9 @@
+#include "network/request/handlers/io_get_dir_content.hpp"
+
 #include "io/console.hpp"
 #include "network.hpp"
 #include "network/bfl/encoder.hpp"
 #include "network/client.hpp"
-#include "network/request/handlers/io_get_dir_content.hpp"
 
 using boost::asio::ip::tcp;
 namespace fs = std::filesystem;
@@ -23,7 +24,7 @@ void IOGetDirContentRH::run() {
 
 bool IOGetDirContentRH::sendBeginResponse(tcp::socket& socket) {
     if (!client->isLogged()) {
-        console::out::err("the client must be logged to do this");
+        console::out::err("the client isn't logged");
         network::sendResponse(socket, ResponseId::NotLogged);
         return false;
     }

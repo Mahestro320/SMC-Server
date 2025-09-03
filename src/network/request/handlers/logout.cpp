@@ -1,7 +1,8 @@
+#include "network/request/handlers/logout.hpp"
+
 #include "io/console.hpp"
 #include "network.hpp"
 #include "network/client.hpp"
-#include "network/request/handlers/logout.hpp"
 
 using boost::asio::ip::tcp;
 
@@ -17,7 +18,7 @@ void LogoutRH::run() {
 
 bool LogoutRH::sendBeginResponse(tcp::socket& socket) {
     if (!client->isLogged()) {
-        console::out::inf("the client must be connected to do this");
+        console::out::inf("the client isn't logged");
         network::sendResponse(socket, ResponseId::NotLogged);
         return false;
     }

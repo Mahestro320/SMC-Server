@@ -1,131 +1,168 @@
-#include <filesystem>
-#include <iostream>
-#include <mutex>
-#include <termcolor.hpp>
-#include "common.hpp"
 #include "io/console.hpp"
-#include "io/directories.hpp"
-#include "io/logger.hpp"
-#include "util/string.hpp"
-#include "util/thread.hpp"
 
-namespace fs = std::filesystem;
+#include <condition_variable>
+#include <deque>
+#include <iostream>
+#include <shared_mutex>
+#include "io/logger.hpp"
+#include "network/client.hpp"
+#include "termcolor.hpp"
+#include "util/resolver/con_str_prop.hpp"
+#include "util/resolver/evs_str.hpp"
+#include "util/time.hpp"
+
+/*
+ * message format:
+ * [<message type> @clt-<client count> | <date: DD/MM/YYYY> <time: HH:MM:SS>] <message>
+ *
+ * for example:
+ * [INFO @clt-221 | 10/09/25 4:33:17] hello !
+ *
+ * Messages can contains colors, environnement vars and sysvars.
+ * To set the color:
+ * <:color=[COLOR]>
+ *
+ */
 
 namespace {
 
-enum class MessagePrefixColor {
-    WHITE,
-    GREEN,
-    YELLOW,
-    RED,
-    BLUE
+enum class MessageType : uint8_t {
+    Info,
+    Warning,
+    Error
 };
 
-struct Message {
-    const std::string type{}, content{}, location{};
-    const MessagePrefixColor color{};
-    const bool is_error{false};
+struct MessageInfo final {
+    MessageType type{};
+    std::string message{};
+    uint64_t timestamp{};
+    std::ostream* stream{&std::cout};
 };
 
-std::string makeRelative(std::string path) {
-    std::replace(path.begin(), path.end(), '/', '\\');
+std::mutex queue_mutex{};
+std::deque<MessageInfo> queue{};
+std::condition_variable cv{};
 
-    const std::string root_str{dirs::COMPILATION_ROOT.string()};
-    auto pos{path.find(root_str)};
-    if (pos != std::string::npos) {
-        return path.substr(pos + root_str.size() + 1);
-    }
-    return path;
-}
-
-std::string getThreadMessage() {
-    const std::string current_thread_id_str{util::thread::getCurrentThreadIdAsString()};
-    return current_thread_id_str == common::main_thread_id ? "" : " (thread " + current_thread_id_str + ')';
-}
-
-std::string getMessageLocation(const std::source_location& location) {
-    std::string msg_path_rel_str{};
-    try {
-        const fs::path msg_path_with_ext{location.file_name()};
-        const fs::path msg_path{msg_path_with_ext.parent_path() / msg_path_with_ext.stem()};
-        msg_path_rel_str = makeRelative(msg_path.string());
-    } catch (...) {
-        msg_path_rel_str = "<UNKNOWN LOCATION>";
-    }
-    return getThreadMessage() + " @" + msg_path_rel_str + ':' + std::to_string(location.line());
-}
-
-void writeColorInStream(std::ostream& stream, MessagePrefixColor color) {
-    switch (color) {
-    case MessagePrefixColor::WHITE:
-        stream << termcolor::white;
-        break;
-
-    case MessagePrefixColor::GREEN:
+void changeColorAccordingToType(MessageType type, std::ostream& stream) {
+    if (type == MessageType::Info) {
         stream << termcolor::green;
-        break;
-
-    case MessagePrefixColor::YELLOW:
+    } else if (type == MessageType::Warning) {
         stream << termcolor::yellow;
-        break;
-
-    case MessagePrefixColor::RED:
+    } else if (type == MessageType::Error) {
         stream << termcolor::red;
-        break;
-
-    case MessagePrefixColor::BLUE:
-        stream << termcolor::blue;
-        break;
+    } else {
+        stream << termcolor::white;
     }
 }
 
-void writeMessageInLog(const Message& msg) {
-    const Logger& logger{Logger::getInstance()};
-    logger.log('[' + msg.type + msg.location + "] " + msg.content + '\n');
+std::string messageTypeToString(MessageType type) {
+    if (type == MessageType::Info) {
+        return "INFO";
+    } else if (type == MessageType::Warning) {
+        return "WARNING";
+    } else if (type == MessageType::Error) {
+        return "ERROR";
+    }
+    return "UNKNOWN";
 }
 
-void printLineFormatted(const Message& msg) {
-    static std::mutex mutex;
-    std::lock_guard<std::mutex> guard(mutex);
-    writeMessageInLog(msg);
-    std::ostream& stream{msg.is_error ? std::cerr : std::cout};
-    stream << termcolor::bright_white << '[';
-    writeColorInStream(stream, msg.color);
-    stream << msg.type << termcolor::bright_blue << msg.location << termcolor::bright_white << "] " << termcolor::reset
-           << msg.content << '\n';
-    return;
+std::string getMessageLocation() {
+    if (!Client::isInstanceSet()) {
+        return "@Main";
+    }
+    Client& client{Client::getInstance()};
+    return "@clt-" + std::to_string(client.getIndex());
+}
+
+void printMessageContent(const std::string& message, std::ostream* stream) {
+    ConStrPropResolver resolver{};
+    resolver.setStream(stream);
+    resolver.setText(message);
+    resolver.print();
+}
+
+void printMessage(MessageInfo msg_info) {
+    *msg_info.stream << termcolor::bright_white << '[';
+    changeColorAccordingToType(msg_info.type, *msg_info.stream);
+    *msg_info.stream << messageTypeToString(msg_info.type) << termcolor::blue << ' ' << getMessageLocation()
+                     << termcolor::cyan << " | " << termcolor::bright_green
+                     << util::time::formatTime(msg_info.timestamp) << termcolor::bright_white << "] "
+                     << termcolor::white;
+    printMessageContent(msg_info.message, msg_info.stream);
+    *msg_info.stream << std::endl;
+}
+
+void logMessage(MessageType type, const std::string& message, uint64_t timestamp) {
+    Logger& logger{Logger::getInstance()};
+    const std::string formated_message{'[' + messageTypeToString(type) + ' ' + getMessageLocation() + " | " +
+                                       util::time::formatTime(timestamp) + "] " + message + '\n'};
+    ConStrPropResolver resolver{};
+    resolver.setStream(&logger.getStream());
+    resolver.setText(formated_message);
+    resolver.print();
+}
+
+std::string getResolvedMessage(const std::string& input) {
+    EVSStrResolver<false> resolver{};
+    resolver.setInput(input);
+    resolver.resolve();
+    return resolver.getOutput();
+}
+
+void processMessage(MessageInfo msg_info) {
+    {
+        std::lock_guard lock(queue_mutex);
+        queue.push_back(std::move(msg_info));
+    }
+    cv.notify_one();
+}
+
+void printerThread() {
+    while (true) {
+        std::unique_lock<std::mutex> lock(queue_mutex);
+        cv.wait(lock, [] { return !queue.empty(); });
+        MessageInfo msg_info{std::move(queue.front())};
+        queue.pop_front();
+        lock.unlock();
+        MessageInfo resolved_msg_info{msg_info};
+        resolved_msg_info.message = getResolvedMessage(msg_info.message);
+        printMessage(resolved_msg_info);
+        logMessage(msg_info.type, resolved_msg_info.message, msg_info.timestamp);
+    }
 }
 
 } // namespace
 
-void console::out::inf(const std::string& inf, const std::source_location& location) {
-    printLineFormatted(Message{
-        .type = "INFO",
-        .content = inf,
-        .location = getMessageLocation(location),
-        .color = MessagePrefixColor::GREEN,
+void console::init() {
+    std::thread t{printerThread};
+    t.detach();
+}
+
+void console::out::inf(const std::string& message) {
+    processMessage(MessageInfo{
+        .type = MessageType::Info,
+        .message = message,
+        .timestamp = util::time::getSeconds(),
     });
 }
 
-void console::out::warn(const std::string& warn, const std::source_location& location) {
-    printLineFormatted(Message{
-        .type = "WARNING",
-        .content = warn,
-        .location = getMessageLocation(location),
-        .color = MessagePrefixColor::YELLOW,
+void console::out::warn(const std::string& message) {
+    processMessage(MessageInfo{
+        .type = MessageType::Warning,
+        .message = "<:color=yellow>" + message,
+        .timestamp = util::time::getSeconds(),
     });
 }
 
-void console::out::err(const std::string& err, const std::source_location& location) {
-    printLineFormatted(Message{
-        .type = "ERROR",
-        .content = err,
-        .location = getMessageLocation(location),
-        .color = MessagePrefixColor::YELLOW,
-        .is_error = true,
+void console::out::err(const std::string& message) {
+    processMessage(MessageInfo{
+        .type = MessageType::Error,
+        .message = "<:color=red>" + message,
+        .timestamp = util::time::getSeconds(),
+        .stream = &std::cerr,
     });
 }
 
-void console::out::err(const std::exception& e, const std::source_location& location) {
-    console::out::err(e.what(), location);
+void console::out::err(const std::exception& e) {
+    console::out::err(e.what());
 }

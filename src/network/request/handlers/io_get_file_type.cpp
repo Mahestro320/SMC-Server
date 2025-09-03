@@ -1,8 +1,9 @@
+#include "network/request/handlers/io_get_file_type.hpp"
+
 #include "io/console.hpp"
 #include "io/file_type.hpp"
 #include "network.hpp"
 #include "network/client.hpp"
-#include "network/request/handlers/io_get_file_type.hpp"
 
 using boost::asio::ip::tcp;
 namespace fs = std::filesystem;
@@ -10,7 +11,7 @@ namespace fs = std::filesystem;
 void IOGetFileTypeRH::run() {
     tcp::socket& socket{client->getSocket()};
     if (!client->isLogged()) {
-        console::out::err("the client must be logged to do this");
+        console::out::err("the client isn't logged");
         network::sendResponse(socket, ResponseId::NotLogged);
         return;
     }

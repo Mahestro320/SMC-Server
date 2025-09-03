@@ -1,7 +1,8 @@
+#include "users/loader.hpp"
+
 #include "io/console.hpp"
 #include "io/directories.hpp"
 #include "users/fs_config.hpp"
-#include "users/loader.hpp"
 #include "users/role.hpp"
 #include "users/uif/decoder.hpp"
 
@@ -22,7 +23,8 @@ bool UserLoader::load() {
     if (!createPersoDirectory()) {
         return false;
     }
-    console::out::inf("loaded user " + user.name + " (" + role::getName(user.role) + ")");
+    console::out::inf("loaded user <:color=bright_blue>" + user.name + "<:color=reset> (<:color=green>" +
+                      role::getName(user.role) + "<:color=reset>)");
     return true;
 }
 

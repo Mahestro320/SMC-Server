@@ -1,13 +1,19 @@
+#include "network/request/handlers/io_get_real_path.hpp"
+
 #include "io/console.hpp"
 #include "network.hpp"
 #include "network/client.hpp"
-#include "network/request/handlers/io_get_real_path.hpp"
 
 using boost::asio::ip::tcp;
 namespace fs = std::filesystem;
 
 void IOGetRealPathRH::run() {
     tcp::socket& socket{client->getSocket()};
+    if (!client->isLogged()) {
+        console::out::err("the client isn't logged");
+        network::sendResponse(socket, ResponseId::NotLogged);
+        return;
+    }
     if (!network::sendResponse(socket, ResponseId::Ok)) {
         return;
     }
@@ -39,7 +45,7 @@ bool IOGetRealPathRH::checkInputPath(tcp::socket& socket) const {
 
 bool IOGetRealPathRH::setRealPath() {
     const SFS& sfs{client->getSFS()};
-    console::out::inf(input_path.string());
+    console::out::inf("real path: " + input_path.string());
     real_path = sfs.real(input_path);
     return true;
 }

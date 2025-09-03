@@ -1,15 +1,14 @@
 /*
  * SMC Server (Super Mega Cool Server)
- * created the 18/06/25
+ * created the 18/06/25 (DD/MM/YY)
  *
  * by Mahestro_320
  */
 
-#include "compilation/arch_check.hpp"
-
-#define _WIN32_WINNT 0x0601
+#include "system/beg.hpp"
 
 #include <array>
+#include <atomic>
 #include <boost/asio.hpp>
 #include "common.hpp"
 #include "io/console.hpp"
@@ -24,19 +23,25 @@ using boost::asio::ip::tcp;
 
 namespace {
 
+std::atomic<uint32_t> client_count{};
+
 void init() {
     common::main_thread_id = util::thread::getCurrentThreadIdAsString();
     Config& config{Config::getInstance()};
     config.load();
     Logger& logger{Logger::getInstance()};
     logger.init();
+    console::init();
     UsersManager& users_manager{UsersManager::getInstance()};
     users_manager.load();
 }
 
 void handleClient(tcp::socket socket) {
     try {
-        Client client{std::move(socket)};
+        const uint32_t client_idx{client_count.load(std::memory_order_acquire)};
+        client_count.fetch_add(1, std::memory_order_release);
+        Client::setInstance(std::move(socket), client_idx);
+        Client& client{Client::getInstance()};
         client.start();
     } catch (const std::bad_alloc& e) {
         console::out::err("memory error: " + std::string{e.what()});
@@ -78,11 +83,12 @@ void runServer(uint16_t port) {
 int main(int /* argc */, char** /* argv */) {
     ::init();
     Config& config{Config::getInstance()};
-    const ConfigValues& values{config.getValues()};
-    console::out::inf("starting server v" + common::VERSION.toString() + " (" + network::getIpv4Address() + ":" +
-                      std::to_string(values.server_port) + ")");
+    const ConfigValues& config_values{config.getValues()};
+    console::out::inf("starting server <:color=green>v<$version><:color=reset> "
+                      "(<:color=bright_blue><$address>:<$port><:color=reset>)");
+    console::out::inf("time format: <:color=bright_blue><$time_format>");
     try {
-        ::runServer(values.server_port);
+        ::runServer(config_values.server_port);
     } catch (const std::bad_alloc& e) {
         console::out::err("UNHANDLED MEMORY ERROR: " + std::string{e.what()});
     } catch (const std::exception& e) {

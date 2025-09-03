@@ -15,13 +15,15 @@ void pinf(const std::string& msg, bool silent) {
 
 bool network::sendResponse(tcp::socket& socket, ResponseId id, bool silent) {
     const uint8_t byte{static_cast<uint8_t>(id)};
-    pinf("sending response: " + std::to_string(byte) + " (" + response::getName(id) + ")", silent);
+    pinf("sending response: <:color=bright_blue>" + std::to_string(byte) + "<:color=reset> (<:color=green>" +
+             response::getName(id) + "<:color=reset>)",
+         silent);
     return sendInt(socket, byte);
 }
 
 bool network::sendBuffer(tcp::socket& socket, const std::vector<char>& buffer, bool silent) {
     const uint64_t buffer_size{buffer.size()};
-    pinf("sending buffer size (" + std::to_string(buffer_size) + ")", silent);
+    pinf("sending buffer size (<:color=bright_blue>" + std::to_string(buffer_size) + "<:color=reset>)", silent);
     if (!sendInt(socket, buffer_size)) {
         return false;
     }
@@ -80,7 +82,7 @@ bool network::readString(boost::asio::ip::tcp::socket& socket, std::string& str,
         return false;
     }
     str = std::string(data.begin(), data.end());
-    pinf("string content: \"" + str + "\"", silent);
+    pinf("string content: <:color=green>\"" + str + "\"<:color=reset>", silent);
     return true;
 }
 

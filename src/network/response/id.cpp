@@ -1,5 +1,6 @@
-#include <unordered_map>
 #include "network/response/id.hpp"
+
+#include <unordered_map>
 
 namespace {
 
@@ -10,6 +11,7 @@ const std::unordered_map<ResponseId, std::string> response_names{
     {ResponseId::InvalidPassword, "INVALID_PASSWORD"},
     {ResponseId::InvalidData, "INVALID_DATA"},
     {ResponseId::InvalidBufferSize, "INVALID_BUFFER_SIZE"},
+    {ResponseId::InvalidPermissions, "INVALID_PERMISSIONS"},
     {ResponseId::NotLogged, "NOT_LOGGED"},
     {ResponseId::IOFileNotExists, "IO_FILE_NOT_EXISTS"},
     {ResponseId::IOFileNotReadable, "IO_FILE_NOT_READABLE"},
@@ -17,6 +19,7 @@ const std::unordered_map<ResponseId, std::string> response_names{
     {ResponseId::IONotFile, "IO_NOT_FILE"},
     {ResponseId::IOInvalidPath, "IO_INVALID_PATH"},
     {ResponseId::IONonAbsolutePath, "IO_NON_ABSOLUTE_PATH"},
+    {ResponseId::IOAlreadyExists, "IO_ALREADY_EXISTS"},
 };
 
 }

@@ -1,7 +1,8 @@
+#include "users/manager.hpp"
+
 #include "io/console.hpp"
 #include "io/directories.hpp"
 #include "users/loader.hpp"
-#include "users/manager.hpp"
 
 namespace fs = std::filesystem;
 
