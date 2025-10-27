@@ -50,3 +50,9 @@
 - adding request handler `io_create_file`
 - adding request handler `io_create_directory`
 - adding request handler `io_set_file_content`
+
+## Version 0.4.0
+
+- adding request handler `io_delete_file`
+- adding request handler `get_version`
+- modifying request ids: the first is now `GetVersion` for compatibility

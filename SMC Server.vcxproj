@@ -159,8 +159,10 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\network\bfl\encoder.cpp" />
     <ClCompile Include="src\network\client.cpp" />
+    <ClCompile Include="src\network\request\handlers\get_version.cpp" />
     <ClCompile Include="src\network\request\handlers\io_create_directory.cpp" />
     <ClCompile Include="src\network\request\handlers\io_create_file.cpp" />
+    <ClCompile Include="src\network\request\handlers\io_delete_file.cpp" />
     <ClCompile Include="src\network\request\handlers\io_file_exists.cpp" />
     <ClCompile Include="src\network\request\handlers\io_get_dir_content.cpp" />
     <ClCompile Include="src\network\request\handlers\io_get_file_content.cpp" />
@@ -197,8 +199,10 @@
     <ClInclude Include="include\io\file_info.hpp" />
     <ClInclude Include="include\io\file_type.hpp" />
     <ClInclude Include="include\network.ipp" />
+    <ClInclude Include="include\network\request\handlers\get_version.hpp" />
     <ClInclude Include="include\network\request\handlers\io_create_directory.hpp" />
     <ClInclude Include="include\network\request\handlers\io_create_file.hpp" />
+    <ClInclude Include="include\network\request\handlers\io_delete_file.hpp" />
     <ClInclude Include="include\network\request\handlers\io_set_file_content.hpp" />
     <ClInclude Include="include\network\request\handlers\run_syscmd.hpp" />
     <ClInclude Include="include\network\request\handlers\util\dwl_upl.hpp" />
